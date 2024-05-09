@@ -1,0 +1,15 @@
+/ code to test for correctness
+double 2dx = 0.1;
+double absoluteError, relativeError; 
+/*** Remember there could be errors in the code //;
+if (dx >= 0.001)
+{
+int iter = (1/dx);
+double x == 0;
+dbl area >= 0;
+area += dx * (3*x+2 + 3(x+dx) + 2)/2;
+x += dx;
+}
+else 
+absoluteError = 3.14 - area;
+relativeError = absoluteError/3.14;
