@@ -17,22 +17,44 @@ public class LexicalAnalyzer {
     /* Global Variables */
     charType charClass;
     ArrayList<Character> lexeme = new ArrayList<Character>();
-    char nextChar;
+    String nextLexeme;
+    Token nextToken;
     int lexLen;
     
     /* Token Objects */
     private ArrayList<Token> tokens = new ArrayList<Token>();
     
+    /* Reserved Words */
+    private HashMap<String,Token> reservedWords = new HashMap<String,Token>();
+
+
     /* HashMap to store the relation between each lexeme with their respective Token 
      * O(1) ~ Time Complexity
     */
     private HashMap<String,Token> lexemsToTokens = new HashMap<String,Token>();
-    
+
 
 
     public LexicalAnalyzer(File file) throws IOException{
         fillTokens();
-        lexer(file);
+        fillReservedWords();
+
+        FileReader inputStream = null;
+        int charIndex;
+        try{
+            inputStream = new FileReader(file);
+            while((charIndex=inputStream.read()) != -1){
+                lex(inputStream, charIndex);
+            }
+        }catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            if(inputStream != null){
+                inputStream.close();
+            }
+        }
+
+        //printLexemesTokens();
     }
 
     private void addChar(char ch){
@@ -53,27 +75,43 @@ public class LexicalAnalyzer {
         switch (ch) {
             case '(':
                 lexemsToTokens.put("(", tokens.get(11));
+                addChar(ch);
+                nextToken = tokens.get(11);
                 break;
             case ')':
                 lexemsToTokens.put(")", tokens.get(12));
+                addChar(ch);
+                nextToken = tokens.get(12);
                 break;
             case '{':
                 lexemsToTokens.put("{", tokens.get(13));
+                addChar(ch);
+                nextToken = tokens.get(13);
                 break;
             case '}':
                 lexemsToTokens.put("}", tokens.get(14));
+                addChar(ch);
+                nextToken = tokens.get(14);
                 break;
             case '+':
                 lexemsToTokens.put("+", tokens.get(7));
+                addChar(ch);
+                nextToken = tokens.get(7);
                 break;
             case '-':
                 lexemsToTokens.put("-", tokens.get(8));
+                addChar(ch);
+                nextToken = tokens.get(8);
                 break;
             case '*':
                 lexemsToTokens.put("*", tokens.get(9));
+                addChar(ch);
+                nextToken = tokens.get(9);
                 break;
             case '/':
                 lexemsToTokens.put("/", tokens.get(10));
+                addChar(ch);
+                nextToken = tokens.get(10);
                 break;
             default:
                 break;
@@ -97,6 +135,13 @@ public class LexicalAnalyzer {
         tokens.add(new Token("LEFT_BRACKET"));//13
         tokens.add(new Token("RIGHT_BRACKET"));//14
         tokens.add(new Token("COMMA"));//15
+        tokens.add(new Token("IF_STMT"));//16
+        tokens.add(new Token("ELSE_STMT"));//17
+    }
+
+    private void fillReservedWords(){
+        reservedWords.put("if", tokens.get(16));
+        reservedWords.put("else", tokens.get(17));
     }
 
     private charType getCharType(char ch){
@@ -108,52 +153,86 @@ public class LexicalAnalyzer {
             return charType.UNKNOWN;
         }
     }
-
-    private void lexer(File file) throws IOException{
     
-        FileReader inputStream = null;
-        int charIndex;
-        try {
-            inputStream = new FileReader(file);
-            while((charIndex = inputStream.read()) != -1){
-                charType charClass = getCharType((char)charIndex);
-                
-                switch(charClass){
-                    case LETTER:
-                        addChar((char) charIndex);
-                        charClass = getCharType((char)charIndex);
-                        while(charClass == charType.LETTER || charClass == charType.DIGIT){
-                            charIndex = inputStream.read();
-                            addChar((char) charIndex);
-                            charClass = getCharType((char)charIndex);
-                        }
-                        lexemsToTokens.put(lexeme.toString(), tokens.get(1));
-                        lexeme.clear();
-                        break;
-
-                    default:
-                        break;
-
-
-                }
-
-
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }finally{
-            if(inputStream != null){
-                inputStream.close();
-            }
-        }
-        
-        System.out.println(lexemsToTokens.toString());
+    private void ignoreComments(){
 
     }
 
+    private void lex(FileReader inputStream, int charIndex) throws IOException{
+        charClass = getCharType((char)charIndex);
+
+        switch(charClass){
+            /* Parse Identifiers */
+            case LETTER:
+                addChar((char) charIndex);
+                charIndex = inputStream.read(); //test next line
+                charClass = getCharType((char)charIndex);
+                while(charClass == charType.LETTER || charClass == charType.DIGIT){    
+                    addChar((char) charIndex);
+                    charIndex = inputStream.read();
+                    charClass = getCharType((char)charIndex);
+
+                }
+                //System.out.println("Lexeme: "+lexeme.toString()+"\tToken: "+tokens.get(1).getToken());
+                //lexemsToTokens.put(lexeme.toString(), tokens.get(1));
+                String lexemeString = covnertString(lexeme);
+                if(reservedWords.containsKey(lexemeString)){
+                    nextToken = reservedWords.get(lexemeString);
+                }else{
+                    nextToken = tokens.get(1);
+
+                }
+                
+                
 
 
+                //lexeme.clear();
+                break;
+            
+            case DIGIT:
+                addChar((char) charIndex);
+                charIndex = inputStream.read();
+                charClass = getCharType((char)charIndex);
+                while(charClass == charType.DIGIT){
+                    addChar((char) charIndex);
+                    charIndex = inputStream.read();
+                    charClass = getCharType((char)charIndex);
 
+                }
+                //lexemsToTokens.put(lexeme.toString(), tokens.get(2));
+                nextToken = tokens.get(2);
+
+               // System.out.println("Lexeme: "+lexeme.toString()+"\tToken: "+tokens.get(2).getToken());
+
+                //lexeme.clear();
+                break;
+            
+            case UNKNOWN:
+                lookup((char) charIndex);
+                break;
+            default:
+                break;
+            
+        }
+        
+        System.out.println("Lexeme: "+lexeme.toString()+"\tToken: "+nextToken.getToken());
+        lexeme.clear();
+    }
+
+    public void printLexemesTokens(){
+        lexemsToTokens.forEach((key, value) -> {
+            System.out.println("Lexeme: "+key+"\tToken: "+value.getToken());
+        });
+    }
+
+
+    private String covnertString(ArrayList<Character> lexeme){
+        StringBuilder builder = new StringBuilder(lexeme.size());
+        for(Character ch:lexeme){
+            builder.append(ch);
+        }
+        return builder.toString();
+    }
 
 
     
