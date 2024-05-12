@@ -11,17 +11,21 @@ public class LexicalAnalyzer {
     enum charType{
         DIGIT,
         LETTER,
+        WS,
         UNKNOWN,
         EOF, //end of file
     }
 
     /* Global Variables */
-    charType charClass;
-    ArrayList<Character> lexeme = new ArrayList<Character>();
-    String nextLexeme;
-    Token nextToken;
-    int lexLen;
     
+    private ArrayList<Character> lexeme = new ArrayList<Character>();
+    private Token nextToken;
+    private int charIndex;
+    private charType charClass;
+    
+    public ArrayList<ArrayList<Token>> TokenCollection = new ArrayList<ArrayList<Token>>();
+    private int line;
+
     /* Token Objects */
     private ArrayList<Token> tokens = new ArrayList<Token>();
     
@@ -29,35 +33,22 @@ public class LexicalAnalyzer {
     private HashMap<String,Token> reservedWords = new HashMap<String,Token>();
 
 
-    /* HashMap to store the relation between each lexeme with their respective Token 
-     * O(1) ~ Time Complexity
-    */
-    private HashMap<String,Token> lexemsToTokens = new HashMap<String,Token>();
 
 
 
     public LexicalAnalyzer(File file) throws IOException{
         fillTokens();
         fillReservedWords();
+        initializeTokenCollection();
 
         FileReader stream = null;
         PushbackReader inputStream = null;
-        int charIndex;
         try{
             stream = new FileReader(file);
             inputStream = new PushbackReader(stream);
             while((charIndex=inputStream.read()) != -1){
-                
-                if((char) charIndex == ' '){
-                    while((char)charIndex == ' '){
-                        charIndex = inputStream.read();
-                    }
-                    inputStream.unread(charIndex);
-                    charIndex = inputStream.read();
-                    
-                }
-
-                lex(inputStream, charIndex);
+                checkNewLine();
+                lex(inputStream);
             }
         }catch (IOException e) {
             e.printStackTrace();
@@ -67,72 +58,18 @@ public class LexicalAnalyzer {
             }
         }
 
-        //printLexemesTokens();
+        printTokenCollection();
     }
 
-    private void addChar(char ch){
-        if(lexeme.size() <= 98){
-            if((int)ch != 32){lexeme.add(ch);}
-        }else{
-            System.out.println("Error - lexeme is too long");
-        }
+    private void initializeTokenCollection(){
+        line = 1;
+        TokenCollection.add(new ArrayList<Token>());
     }
 
-    private void getChar(){
-        
-    }
-
-
-
-    private void lookup(char ch){
-        switch (ch) {
-            case '(':
-                lexemsToTokens.put("(", tokens.get(11));
-                addChar(ch);
-                nextToken = tokens.get(11);
-                break;
-            case ')':
-                lexemsToTokens.put(")", tokens.get(12));
-                addChar(ch);
-                nextToken = tokens.get(12);
-                break;
-            case '{':
-                lexemsToTokens.put("{", tokens.get(13));
-                addChar(ch);
-                nextToken = tokens.get(13);
-                break;
-            case '}':
-                lexemsToTokens.put("}", tokens.get(14));
-                addChar(ch);
-                nextToken = tokens.get(14);
-                break;
-            case '+':
-                lexemsToTokens.put("+", tokens.get(7));
-                addChar(ch);
-                nextToken = tokens.get(7);
-                break;
-            case '-':
-                lexemsToTokens.put("-", tokens.get(8));
-                addChar(ch);
-                nextToken = tokens.get(8);
-                break;
-            case '*':
-                lexemsToTokens.put("*", tokens.get(9));
-                addChar(ch);
-                nextToken = tokens.get(9);
-                break;
-            case '/':
-                lexemsToTokens.put("/", tokens.get(10));
-                addChar(ch);
-                nextToken = tokens.get(10);
-                break;
-            case ';':
-                lexemsToTokens.put(";", tokens.get(0));
-                addChar(ch);
-                nextToken = tokens.get(0);
-                break;
-            default:
-                break;
+    private void checkNewLine(){
+        if((char)charIndex == '\n'){
+            line++;
+            TokenCollection.add(new ArrayList<Token>());
         }
     }
 
@@ -159,6 +96,7 @@ public class LexicalAnalyzer {
         tokens.add(new Token("WHILE_STMT"));//19
         tokens.add(new Token("INT_IDENT"));//20
         tokens.add(new Token("DOUBLE_IDENT"));//21
+        tokens.add(new Token("PERIOD"));//22
     }
 
     private void fillReservedWords(){
@@ -168,8 +106,25 @@ public class LexicalAnalyzer {
         reservedWords.put("while", tokens.get(19));
         reservedWords.put("int", tokens.get(20));
         reservedWords.put("double", tokens.get(21));
-        
+    }
 
+
+    private void removeWS(){
+
+    }
+
+    private void addChar(char ch){
+        if(lexeme.size() <= 98){
+            if(String.valueOf(ch) != ""){
+                lexeme.add(ch);
+            }
+        }else{
+            System.out.println("Error - lexeme is too long");
+        }
+    }
+
+    private int getChar(PushbackReader inputStream) throws IOException{
+        return inputStream.read();
     }
 
     private charType getCharType(char ch){
@@ -177,60 +132,109 @@ public class LexicalAnalyzer {
             return charType.LETTER;
         }else if(Character.isDigit(ch)){
             return charType.DIGIT;
+        }else if(Character.isWhitespace(ch)){
+            return charType.WS;
         }else{
             return charType.UNKNOWN;
         }
     }
-    
-    private void lex(PushbackReader inputStream, int charIndex) throws IOException{
-        charClass = getCharType((char)charIndex);
 
+    private void lookup(char ch){
+        switch (ch) {
+            case '(':
+                addChar(ch);
+                this.nextToken = tokens.get(11);
+                break;
+            case ')':
+                addChar(ch);
+                this.nextToken = tokens.get(12);
+                break;
+            case '{':
+                addChar(ch);
+                this.nextToken = tokens.get(13);
+                break;
+            case '}':
+                addChar(ch);
+                this.nextToken = tokens.get(14);
+                break;
+            case ',':
+                addChar(ch);
+                this.nextToken = tokens.get(15);
+                break;
+            case '=':
+                addChar(ch);
+                this.nextToken = tokens.get(6);
+                break;
+            case '+':
+                addChar(ch);
+                this.nextToken = tokens.get(7);
+                break;
+            case '-':
+                addChar(ch);
+                this.nextToken = tokens.get(8);
+                break;
+            case '*':
+                addChar(ch);
+                this.nextToken = tokens.get(9);
+                break;
+            case '/':
+                addChar(ch);
+                this.nextToken = tokens.get(10);
+                break;
+            case ';':
+                addChar(ch);
+                this.nextToken = tokens.get(0);
+                break;
+            default:
+                break;
+        }
+    }
+
+
+    
+    private void lex(PushbackReader inputStream) throws IOException{
+        charClass = getCharType((char)charIndex);
         switch(charClass){
             /* Parse Identifiers */
             case LETTER:
                 addChar((char) charIndex);
-                charIndex = inputStream.read(); //test next line
+                charIndex = getChar(inputStream);
                 charClass = getCharType((char)charIndex);
+
                 while(charClass == charType.LETTER || charClass == charType.DIGIT){    
                     addChar((char) charIndex);
-                    charIndex = inputStream.read();
+                    charIndex = getChar(inputStream);
                     charClass = getCharType((char)charIndex);
-
+                    
                 }
-                inputStream.unread(charIndex);
-                //System.out.println("Lexeme: "+lexeme.toString()+"\tToken: "+tokens.get(1).getToken());
-                //lexemsToTokens.put(lexeme.toString(), tokens.get(1));
+                inputStream.unread(charIndex);//revert changes which are not applicable
                 String lexemeString = covnertString(lexeme);
+
+                //checks if current lexeme is a reservedWord
                 if(reservedWords.containsKey(lexemeString)){
                     nextToken = reservedWords.get(lexemeString);
                 }else{
                     nextToken = tokens.get(1);
-
                 }
-                
-                
-
-
-                //lexeme.clear();
                 break;
-            
+                
             case DIGIT:
+                int decimalCounter = 0;
                 addChar((char) charIndex);
-                charIndex = inputStream.read();
+                charIndex = getChar(inputStream);
                 charClass = getCharType((char)charIndex);
-                while(charClass == charType.DIGIT){
-                    addChar((char) charIndex);
-                    charIndex = inputStream.read();
-                    charClass = getCharType((char)charIndex);
 
+                //if next char is a digit or if next char is '.' and there is not more than 1 decimals already.
+                while(charClass == charType.DIGIT || ((char)charIndex == '.' && decimalCounter++ <=1)){
+                    addChar((char) charIndex);
+                    charIndex = getChar(inputStream);
+                    charClass = getCharType((char)charIndex);
                 }
                 inputStream.unread(charIndex);
-                //lexemsToTokens.put(lexeme.toString(), tokens.get(2));
-                nextToken = tokens.get(2);
-
-               // System.out.println("Lexeme: "+lexeme.toString()+"\tToken: "+tokens.get(2).getToken());
-
-                //lexeme.clear();
+                //if there is a decimal, store the token as DOUBLE, else store as INT
+                if(decimalCounter > 0) nextToken = tokens.get(3);
+                else nextToken = tokens.get(2);
+                
                 break;
             
             case UNKNOWN:
@@ -241,19 +245,27 @@ public class LexicalAnalyzer {
             
         }
         if(covnertString(lexeme) != ""){
-            System.out.println("Lexeme: "+covnertString(lexeme)+"\tToken: "+nextToken.getToken());
+            TokenCollection.get(line-1).add(nextToken);
+            System.out.println("Lexeme: "+covnertString(lexeme)+"\tToken: "+this.nextToken.getToken());
         }
         lexeme.clear();
 
     }
 
-    public void printLexemesTokens(){
-        lexemsToTokens.forEach((key, value) -> {
-            System.out.println("Lexeme: "+key+"\tToken: "+value.getToken());
+
+    private void printTokenCollection(){
+        System.out.println("--------------------------------------------------------------------------------");
+        TokenCollection.forEach(line->{
+            System.out.print("Line "+(TokenCollection.indexOf(line)+1) + ": ");
+            line.forEach(token->{
+                System.out.print(token.getToken()+" ");
+            });
+            System.out.println("");
         });
+        System.out.println("--------------------------------------------------------------------------------");
     }
 
-
+    
     private String covnertString(ArrayList<Character> lexeme){
         StringBuilder builder = new StringBuilder(lexeme.size());
         for(Character ch:lexeme){
@@ -263,7 +275,6 @@ public class LexicalAnalyzer {
     }
 
 
-    
-
+ 
 
 }
