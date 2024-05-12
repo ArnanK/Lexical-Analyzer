@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.File;
 import java.io.FileReader;
+import java.io.PushbackReader;
 import java.io.IOException;
 
 
@@ -39,11 +40,23 @@ public class LexicalAnalyzer {
         fillTokens();
         fillReservedWords();
 
-        FileReader inputStream = null;
+        FileReader stream = null;
+        PushbackReader inputStream = null;
         int charIndex;
         try{
-            inputStream = new FileReader(file);
+            stream = new FileReader(file);
+            inputStream = new PushbackReader(stream);
             while((charIndex=inputStream.read()) != -1){
+                
+                if((char) charIndex == ' '){
+                    while((char)charIndex == ' '){
+                        charIndex = inputStream.read();
+                    }
+                    inputStream.unread(charIndex);
+                    charIndex = inputStream.read();
+                    
+                }
+
                 lex(inputStream, charIndex);
             }
         }catch (IOException e) {
@@ -59,7 +72,7 @@ public class LexicalAnalyzer {
 
     private void addChar(char ch){
         if(lexeme.size() <= 98){
-            lexeme.add(ch);
+            if((int)ch != 32){lexeme.add(ch);}
         }else{
             System.out.println("Error - lexeme is too long");
         }
@@ -113,6 +126,11 @@ public class LexicalAnalyzer {
                 addChar(ch);
                 nextToken = tokens.get(10);
                 break;
+            case ';':
+                lexemsToTokens.put(";", tokens.get(0));
+                addChar(ch);
+                nextToken = tokens.get(0);
+                break;
             default:
                 break;
         }
@@ -137,11 +155,21 @@ public class LexicalAnalyzer {
         tokens.add(new Token("COMMA"));//15
         tokens.add(new Token("IF_STMT"));//16
         tokens.add(new Token("ELSE_STMT"));//17
+        tokens.add(new Token("FOR_STMT"));//18
+        tokens.add(new Token("WHILE_STMT"));//19
+        tokens.add(new Token("INT_IDENT"));//20
+        tokens.add(new Token("DOUBLE_IDENT"));//21
     }
 
     private void fillReservedWords(){
         reservedWords.put("if", tokens.get(16));
         reservedWords.put("else", tokens.get(17));
+        reservedWords.put("for", tokens.get(18));
+        reservedWords.put("while", tokens.get(19));
+        reservedWords.put("int", tokens.get(20));
+        reservedWords.put("double", tokens.get(21));
+        
+
     }
 
     private charType getCharType(char ch){
@@ -154,11 +182,7 @@ public class LexicalAnalyzer {
         }
     }
     
-    private void ignoreComments(){
-
-    }
-
-    private void lex(FileReader inputStream, int charIndex) throws IOException{
+    private void lex(PushbackReader inputStream, int charIndex) throws IOException{
         charClass = getCharType((char)charIndex);
 
         switch(charClass){
@@ -173,6 +197,7 @@ public class LexicalAnalyzer {
                     charClass = getCharType((char)charIndex);
 
                 }
+                inputStream.unread(charIndex);
                 //System.out.println("Lexeme: "+lexeme.toString()+"\tToken: "+tokens.get(1).getToken());
                 //lexemsToTokens.put(lexeme.toString(), tokens.get(1));
                 String lexemeString = covnertString(lexeme);
@@ -199,6 +224,7 @@ public class LexicalAnalyzer {
                     charClass = getCharType((char)charIndex);
 
                 }
+                inputStream.unread(charIndex);
                 //lexemsToTokens.put(lexeme.toString(), tokens.get(2));
                 nextToken = tokens.get(2);
 
@@ -214,9 +240,11 @@ public class LexicalAnalyzer {
                 break;
             
         }
-        
-        System.out.println("Lexeme: "+lexeme.toString()+"\tToken: "+nextToken.getToken());
+        if(covnertString(lexeme) != ""){
+            System.out.println("Lexeme: "+covnertString(lexeme)+"\tToken: "+nextToken.getToken());
+        }
         lexeme.clear();
+
     }
 
     public void printLexemesTokens(){
