@@ -8,9 +8,11 @@ public class Main {
             "ParseCodeSP24.txt"
         );
         
-
+        //parses through all the lexemes to collect
         LexicalAnalyzer lexer = new LexicalAnalyzer(file);
-        
+
+        SyntaxAnalyzer syntaxChecker = new SyntaxAnalyzer(lexer.TokenCollection);
+    
     }
 
     

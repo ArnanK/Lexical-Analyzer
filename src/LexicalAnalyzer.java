@@ -24,6 +24,8 @@ public class LexicalAnalyzer {
     private charType charClass;
     
     public ArrayList<ArrayList<Token>> TokenCollection = new ArrayList<ArrayList<Token>>();
+    public ArrayList<Token> allTokens = new ArrayList<Token>();
+
     private int line;
 
     /* Token Objects */
@@ -31,8 +33,6 @@ public class LexicalAnalyzer {
     
     /* Reserved Words */
     private HashMap<String,Token> reservedWords = new HashMap<String,Token>();
-
-
 
 
 
@@ -97,6 +97,14 @@ public class LexicalAnalyzer {
         tokens.add(new Token("INT_IDENT"));//20
         tokens.add(new Token("DOUBLE_IDENT"));//21
         tokens.add(new Token("PERIOD"));//22
+        tokens.add(new Token("GREATER_BOOL"));//23
+        tokens.add(new Token("LESS_BOOL"));//24
+        tokens.add(new Token("TRUE"));//25
+        tokens.add(new Token("FALSE"));//26
+        tokens.add(new Token("GREATER_EQ_BOOL")); //27
+        tokens.add(new Token("LESS_EQ_BOOL")); //28
+        tokens.add(new Token("EQUAL_BOOL"));//29
+
     }
 
     private void fillReservedWords(){
@@ -106,12 +114,10 @@ public class LexicalAnalyzer {
         reservedWords.put("while", tokens.get(19));
         reservedWords.put("int", tokens.get(20));
         reservedWords.put("double", tokens.get(21));
+        reservedWords.put("true", tokens.get(25));
+        reservedWords.put("false", tokens.get(26));
     }
 
-
-    private void removeWS(){
-
-    }
 
     private void addChar(char ch){
         if(lexeme.size() <= 98){
@@ -139,7 +145,7 @@ public class LexicalAnalyzer {
         }
     }
 
-    private void lookup(char ch){
+    private void lookup(char ch, PushbackReader inputStream)throws IOException{
         switch (ch) {
             case '(':
                 addChar(ch);
@@ -163,11 +169,26 @@ public class LexicalAnalyzer {
                 break;
             case '=':
                 addChar(ch);
-                this.nextToken = tokens.get(6);
+                charIndex = getChar(inputStream);
+                if ((char) charIndex == '=') {
+                    addChar((char) charIndex);
+                    this.nextToken = tokens.get(29);
+                } else {
+                    inputStream.unread(charIndex);
+                    this.nextToken = tokens.get(6);
+                }
                 break;
             case '+':
                 addChar(ch);
-                this.nextToken = tokens.get(7);
+                charIndex = getChar(inputStream);
+                if ((char) charIndex == '=') {
+                    addChar((char) charIndex);
+                    this.nextToken = tokens.get(6);
+                } else {
+                    inputStream.unread(charIndex);
+                    this.nextToken = tokens.get(7);
+                }
+                
                 break;
             case '-':
                 addChar(ch);
@@ -184,6 +205,27 @@ public class LexicalAnalyzer {
             case ';':
                 addChar(ch);
                 this.nextToken = tokens.get(0);
+                break;
+            case '>':
+                addChar(ch);
+                charIndex = getChar(inputStream);
+                if ((char) charIndex == '=') {
+                    addChar((char) charIndex);
+                    this.nextToken = tokens.get(27);
+                } else {
+                    inputStream.unread(charIndex);
+                    this.nextToken = tokens.get(23);
+                }
+            case '<':
+                addChar(ch);
+                charIndex = getChar(inputStream);
+                if ((char) charIndex == '=') {
+                    addChar((char) charIndex);
+                    this.nextToken = tokens.get(28);
+                } else {
+                    inputStream.unread(charIndex);
+                    this.nextToken = tokens.get(24);
+                }
                 break;
             default:
                 break;
@@ -238,7 +280,7 @@ public class LexicalAnalyzer {
                 break;
             
             case UNKNOWN:
-                lookup((char) charIndex);
+                lookup((char) charIndex, inputStream);
                 break;
             default:
                 break;
@@ -246,6 +288,7 @@ public class LexicalAnalyzer {
         }
         if(covnertString(lexeme) != ""){
             TokenCollection.get(line-1).add(nextToken);
+            allTokens.add(nextToken);
             System.out.println("Lexeme: "+covnertString(lexeme)+"\tToken: "+this.nextToken.getToken());
         }
         lexeme.clear();
