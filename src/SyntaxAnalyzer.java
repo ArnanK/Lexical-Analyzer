@@ -57,7 +57,7 @@ public class SyntaxAnalyzer {
     private void stmts() {
         Token tokenType = getTokenType();
         if (tokenType == null) return;
-        
+        //case statements for tokens
         switch (tokenType.getToken()) {
             case "IF_STMT":
                 if_stmt();
@@ -121,6 +121,7 @@ public class SyntaxAnalyzer {
         expect("SEMI_COLON"); //ends each line with semi colon
     }
 
+    //processes an assignment statement
     private void assign_stmt() {
         if (!expect("ASSIGN_OP")) return;
         Token tokenType = getTokenType();
@@ -131,6 +132,8 @@ public class SyntaxAnalyzer {
         expr();
     }
 
+
+    //get expression value.
     private void expr() {
         Token tokenType = getTokenType();
         if (tokenType == null) return;
@@ -154,6 +157,7 @@ public class SyntaxAnalyzer {
         }
     }
 
+    //checks if token is bool
     private boolean bool() {
         Token currToken = getTokenType();
         if (currToken == null) return false;
@@ -179,15 +183,16 @@ public class SyntaxAnalyzer {
         }
         return false;
     }
-    
+
+    //checks if token is an operator
     private boolean check_op() {
         Token currToken = getTokenType();
         if (currToken != null &&
             (currToken.getToken().equals("EQUAL_OP") ||
              currToken.getToken().equals("GREATER_OP") ||
              currToken.getToken().equals("LESS_OP") ||
-             currToken.getToken().equals("GE_OP") ||
-             currToken.getToken().equals("LE_OP"))) {
+             currToken.getToken().equals("GEATER_EQ_OP") ||
+             currToken.getToken().equals("LESS_EQ_OP"))) {
             nextToken();
             return true;
         }

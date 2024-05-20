@@ -10,7 +10,7 @@ public class Main {
         
         //parses through all the lexemes to collect
         LexicalAnalyzer lexer = new LexicalAnalyzer(file);
-
+        
         SyntaxAnalyzer syntaxChecker = new SyntaxAnalyzer(lexer.TokenCollection);
     
     }

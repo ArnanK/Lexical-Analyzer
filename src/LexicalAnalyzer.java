@@ -46,7 +46,7 @@ public class LexicalAnalyzer {
         try{
             stream = new FileReader(file);
             inputStream = new PushbackReader(stream);
-            while((charIndex=inputStream.read()) != -1){
+            while((charIndex=inputStream.read()) != -1){//check until no more to read
                 checkNewLine();
                 lex(inputStream);
             }
@@ -54,7 +54,7 @@ public class LexicalAnalyzer {
             e.printStackTrace();
         }finally{
             if(inputStream != null){
-                inputStream.close();
+                inputStream.close(); //close file
             }
         }
 
@@ -170,7 +170,7 @@ public class LexicalAnalyzer {
             case '=':
                 addChar(ch);
                 charIndex = getChar(inputStream);
-                if ((char) charIndex == '=') {
+                if ((char) charIndex == '=') { //checks for bool_eq
                     addChar((char) charIndex);
                     this.nextToken = tokens.get(29);
                 } else {
@@ -181,7 +181,7 @@ public class LexicalAnalyzer {
             case '+':
                 addChar(ch);
                 charIndex = getChar(inputStream);
-                if ((char) charIndex == '=') {
+                if ((char) charIndex == '=') { //checks for add_assign
                     addChar((char) charIndex);
                     this.nextToken = tokens.get(6);
                 } else {
@@ -211,7 +211,7 @@ public class LexicalAnalyzer {
                 charIndex = getChar(inputStream);
                 if ((char) charIndex == '=') {
                     addChar((char) charIndex);
-                    this.nextToken = tokens.get(27);
+                    this.nextToken = tokens.get(27); //checks for bool
                 } else {
                     inputStream.unread(charIndex);
                     this.nextToken = tokens.get(23);
@@ -221,7 +221,7 @@ public class LexicalAnalyzer {
                 charIndex = getChar(inputStream);
                 if ((char) charIndex == '=') {
                     addChar((char) charIndex);
-                    this.nextToken = tokens.get(28);
+                    this.nextToken = tokens.get(28); //checks for bool
                 } else {
                     inputStream.unread(charIndex);
                     this.nextToken = tokens.get(24);
@@ -243,7 +243,7 @@ public class LexicalAnalyzer {
                 charIndex = getChar(inputStream);
                 charClass = getCharType((char)charIndex);
 
-                while(charClass == charType.LETTER || charClass == charType.DIGIT){    
+                while(charClass == charType.LETTER || charClass == charType.DIGIT){    //add all characters that are applicable
                     addChar((char) charIndex);
                     charIndex = getChar(inputStream);
                     charClass = getCharType((char)charIndex);
