@@ -1,3 +1,7 @@
+/**
+ * The `LexicalAnalyzer` class in Java reads a file character by character, identifies tokens such as
+ * identifiers and reserved words, and organizes them into a collection for further processing.
+ */
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.File;
@@ -145,6 +149,20 @@ public class LexicalAnalyzer {
         }
     }
 
+    /**
+     * The `lookup` function in Java reads a character from an input stream and determines the
+     * corresponding token based on the character, handling special cases for certain characters like
+     * '=', '+', '-', '*', '/', '>', and '<'.
+     * 
+     * @param ch The `ch` parameter in the `lookup` method represents the current character being
+     * processed from the input stream. The method uses a switch-case statement to determine the action
+     * to take based on the value of `ch`. Depending on the value of `ch`, different tokens are
+     * assigned to `this.nextToken`
+     * @param inputStream The `inputStream` parameter in the `lookup` method is a `PushbackReader`
+     * object that allows you to read characters from an input stream and "push back" characters so
+     * that they can be read again later. This is useful for implementing parsers or tokenizers where
+     * you may need to peek
+     */
     private void lookup(char ch, PushbackReader inputStream)throws IOException{
         switch (ch) {
             case '(':
@@ -234,6 +252,15 @@ public class LexicalAnalyzer {
 
 
     
+    /**
+     * The `lex` function reads characters from an input stream, identifies tokens such as identifiers,
+     * digits, and unknown characters, and stores the corresponding tokens in a collection.
+     * 
+     * @param inputStream The `inputStream` parameter in the `lex` method is a `PushbackReader` object
+     * that is used to read characters from an input stream. The method reads characters from this
+     * input stream, identifies the type of characters (such as letters, digits, or unknown
+     * characters), and processes them accordingly
+     */
     private void lex(PushbackReader inputStream) throws IOException{
         charClass = getCharType((char)charIndex);
         switch(charClass){

@@ -1,3 +1,7 @@
+/**
+ * The `SyntaxAnalyzer` class in Java processes a collection of tokens representing a program's syntax,
+ * checking for correct syntax structure and handling different types of statements.
+ */
 import java.util.ArrayList;
 
 public class SyntaxAnalyzer {
@@ -54,6 +58,10 @@ public class SyntaxAnalyzer {
         }
     }
 
+    /**
+     * The `stmts()` function in Java processes different types of tokens and calls corresponding
+     * functions based on the token type.
+     */
     private void stmts() {
         Token tokenType = getTokenType();
         if (tokenType == null) return;
@@ -84,6 +92,9 @@ public class SyntaxAnalyzer {
     }
 
 
+  /**
+   * The `if_stmt` function checks for the presence of a boolean expression within parentheses.
+   */
     private void if_stmt() {
         nextToken();
         if (!expect("LEFT_PAREN")) return;
@@ -91,6 +102,9 @@ public class SyntaxAnalyzer {
         if (!expect("RIGHT_PAREN")) return;
     }
 
+   /**
+    * The else_stmt function in Java advances to the next token and then calls the stmts function.
+    */
     private void else_stmt() {
         nextToken();
         stmts(); 
@@ -134,6 +148,10 @@ public class SyntaxAnalyzer {
 
 
     //get expression value.
+    /**
+     * The expr() function in Java parses tokens representing mathematical expressions, handling
+     * parentheses and arithmetic operations recursively.
+     */
     private void expr() {
         Token tokenType = getTokenType();
         if (tokenType == null) return;
@@ -171,7 +189,12 @@ public class SyntaxAnalyzer {
         }
         return false;
     }
-    //check if currToken is arithimitc
+    /// The `arithmitic_value()` method is checking if the current token is an arithmetic value. It
+    // does this by retrieving the current token using `getTokenType()`, and then checking if the
+    // token is not null and if its type is either an identifier, an integer literal, or a double
+    // literal. If the token matches any of these types, the method advances to the next token using
+    // `nextToken()` and returns true. Otherwise, it returns false. This method is used to handle
+    // arithmetic values in the syntax analysis process.
     private boolean arithmitic_value() {
         Token currToken = getTokenType();
         if (currToken != null &&
