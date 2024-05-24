@@ -12,7 +12,11 @@ public class SyntaxAnalyzer {
 
     public SyntaxAnalyzer(ArrayList<ArrayList<Token>> TokenCollection) {
         this.TokenCollection = TokenCollection;
-        program();
+        //Runs through stmts() until the line number is out of bounds of the TokenCollection.
+        while (lineNumber - 1 < TokenCollection.size()) {
+            stmts();
+            nextLine();
+        }
     }
 
     private Token getTokenType() {
@@ -51,12 +55,6 @@ public class SyntaxAnalyzer {
         System.out.println("Line " + lineNumber + ": Error");
     }
 
-    private void program() {
-        while (lineNumber - 1 < TokenCollection.size()) {
-            stmts();
-            nextLine();
-        }
-    }
 
     /**
      * The `stmts()` function in Java processes different types of tokens and calls corresponding
@@ -189,12 +187,7 @@ public class SyntaxAnalyzer {
         }
         return false;
     }
-    /// The `arithmitic_value()` method is checking if the current token is an arithmetic value. It
-    // does this by retrieving the current token using `getTokenType()`, and then checking if the
-    // token is not null and if its type is either an identifier, an integer literal, or a double
-    // literal. If the token matches any of these types, the method advances to the next token using
-    // `nextToken()` and returns true. Otherwise, it returns false. This method is used to handle
-    // arithmetic values in the syntax analysis process.
+    /// The `arithmitic_value()` method is checking if the current token is an arithmetic value. 
     private boolean arithmitic_value() {
         Token currToken = getTokenType();
         if (currToken != null &&
