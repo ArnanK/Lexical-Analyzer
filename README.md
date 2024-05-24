@@ -1,18 +1,31 @@
-## Getting Started
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+# Lexical Syntax Analyzer
 
-## Folder Structure
+This takes in .txt input of java code and analyes the tokens and matches them to syntax rules.
 
-The workspace contains two folders by default, where:
+- Prints out all the tokens and lexems
+- Checks each line
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
 
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
+## Run Locally
 
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
+Clone the project
 
-## Dependency Management
+```bash
+  git clone https://github.com/ArnanK/Lexical-Syntax-Analyzer.git
+```
 
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+Go to the project directory
+
+```bash
+  cd Lexical-Syntax-Analyzer
+```
+Compile and run
+```
+  run
+```
+
+## Author
+
+- [@ArnanK](https://github.com/ArnanK)
+
